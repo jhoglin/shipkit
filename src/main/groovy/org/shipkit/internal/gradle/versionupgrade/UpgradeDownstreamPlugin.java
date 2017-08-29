@@ -9,12 +9,15 @@ import org.shipkit.gradle.exec.ShipkitExecTask;
 import org.shipkit.internal.gradle.configuration.DeferredConfiguration;
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin;
 import org.shipkit.internal.gradle.exec.ExecCommandFactory;
+import org.shipkit.internal.gradle.git.GitSetupPlugin;
 import org.shipkit.internal.gradle.git.tasks.CloneGitRepositoryTask;
 import org.shipkit.internal.gradle.util.TaskMaker;
 import org.shipkit.internal.util.ExposedForTesting;
 import org.shipkit.version.VersionInfo;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.shipkit.internal.util.ArgumentValidation.notNull;
 import static org.shipkit.internal.util.RepositoryNameUtil.repositoryNameToCamelCase;
@@ -105,9 +108,21 @@ public class UpgradeDownstreamPlugin implements Plugin<Project> {
             @Override
             public void execute(final ShipkitExecTask task) {
                 task.setDescription("Performs dependency upgrade in " + consumerRepository);
+                List<String> commands = new ArrayList<String>();
+                commands.add("./gradlew");
+
+                boolean shouldConfigureGit = project.getPlugins().hasPlugin(CiUpgradeDownstreamPlugin.class);
+                if(shouldConfigureGit){
+                    commands.add(GitSetupPlugin.SET_EMAIL_TASK);
+                    commands.add(GitSetupPlugin.SET_USER_TASK);
+                }
+
+                commands.add(UpgradeDependencyPlugin.PERFORM_VERSION_UPGRADE);
+                commands.add(getDependencyProperty(project));
+
                 task.execCommand(ExecCommandFactory.execCommand("Upgrading dependency",
                     getConsumerRepoTempDir(project, consumerRepository),
-                    "./gradlew", "performVersionUpgrade", getDependencyProperty(project)));
+                    commands));
             }
         });
     }

@@ -83,6 +83,13 @@ public class ExecCommandFactory {
      */
     public static ExecCommand execCommand(String description, File workingDir, String ... commandLine) {
         Collection<String> cmd = asList(commandLine);
+        return execCommand(description, workingDir, cmd);
+    }
+
+    /**
+     * See {@link #execCommand(String, Collection)}
+     */
+    public static ExecCommand execCommand(String description, File workingDir, Collection<String> cmd) {
         String prefix = defaultPrefix(cmd);
         return new ExecCommand(prefix, description, cmd, ignoreResult(workingDir), ensureSucceeded(prefix));
     }

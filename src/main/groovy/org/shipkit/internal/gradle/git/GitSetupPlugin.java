@@ -50,8 +50,8 @@ public class GitSetupPlugin implements Plugin<Project> {
 
     private static final String UNSHALLOW_TASK = "gitUnshallow";
     public static final String CHECKOUT_TASK = "gitCheckout";
-    private static final String SET_USER_TASK = "setGitUserName";
-    private static final String SET_EMAIL_TASK = "setGitUserEmail";
+    public static final String SET_USER_TASK = "setGitUserName";
+    public static final String SET_EMAIL_TASK = "setGitUserEmail";
     public static final String CI_RELEASE_PREPARE_TASK = "ciReleasePrepare";
 
     @Override

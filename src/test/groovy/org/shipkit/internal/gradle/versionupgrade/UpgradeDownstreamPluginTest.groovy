@@ -15,7 +15,7 @@ class UpgradeDownstreamPluginTest extends PluginSpecification {
 
     def "should fail when no consumer repositories defined"() {
         when:
-        project.plugins.apply(UpgradeDownstreamPlugin).upgradeDownstreamExtension
+        project.plugins.apply(UpgradeDownstreamPlugin)
         project.evaluate()
 
         then:
@@ -51,7 +51,7 @@ class UpgradeDownstreamPluginTest extends PluginSpecification {
         task.repositoryUrl == 'http://git.com/wwilk/mockito'
     }
 
-    def "should correctly configure produce version upgrade task"() {
+    def "should correctly configure upgrade{Repo} task"() {
         when:
         def upgradeDownstream = project.plugins.apply(UpgradeDownstreamPlugin).upgradeDownstreamExtension
         upgradeDownstream.repositories = ['wwilk/mockito']
@@ -62,6 +62,20 @@ class UpgradeDownstreamPluginTest extends PluginSpecification {
         then:
         ShipkitExecTask task = project.tasks['upgradeWwilkMockito']
         task.execCommands[0].commandLine == ["./gradlew", "performVersionUpgrade", "-Pdependency=depGroup:depName:0.1.2"]
+    }
+
+    def "should add CI tasks to upgrade{Repo} task execCommands when CiUpgradeDownstreamPlugin applied"() {
+        when:
+        def upgradeDownstream = project.plugins.apply(UpgradeDownstreamPlugin).upgradeDownstreamExtension
+        upgradeDownstream.repositories = ['wwilk/mockito']
+        project.group = "depGroup"
+        project.plugins.apply(CiUpgradeDownstreamPlugin)
+
+        project.evaluate()
+
+        then:
+        ShipkitExecTask task = project.tasks['upgradeWwilkMockito']
+        task.execCommands[0].commandLine == ["./gradlew", "setGitUserEmail", "setGitUserName", "performVersionUpgrade", "-Pdependency=depGroup:depName:0.1.2"]
     }
 
     @Override
